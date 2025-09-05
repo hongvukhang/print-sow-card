@@ -1,0 +1,74 @@
+.container-input {
+  display: flex;
+  width: 325px;
+  justify-content: space-between;
+  align-items: center;
+}
+.form {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 50px;
+  margin-bottom: 20px;
+}
+.input {
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  background: #f9f9fb;
+  box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.1),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.8);
+  transition: all 0.2s ease;
+  width: 140px;
+}
+.input:focus {
+  box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.2),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.9), 0 0 0 2px #d1d5db;
+}
+.title-input {
+  font-size: 18px;
+  font-weight: 700;
+  font-family: serif;
+}
+.container-button-file {
+  display: flex;
+  justify-content: center;
+}
+.custom-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  background: #f9f9fb;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.1),
+    -3px -3px 6px rgba(255, 255, 255, 0.8);
+  transition: all 0.2s ease;
+}
+.custom-btn:hover {
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.15),
+    -2px -2px 5px rgba(255, 255, 255, 0.9);
+}
+.container-print {
+  overflow: auto;
+  padding: 8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  height: 85px;
+  justify-content: space-around;
+}
+.print-btn {
+}
+@media print {
+  @page {
+    size: 8.26in 11.68in;
+    margin: 0;
+  }
+}

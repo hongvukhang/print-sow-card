@@ -1,0 +1,9 @@
+.font {
+  font-family: emoji;
+}
+@media print {
+  @page {
+    size: Letter;
+    margin: 0;
+  }
+}
