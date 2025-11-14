@@ -1,0 +1,26 @@
+.content-title {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  flex-direction: column;
+  height: 150px;
+  margin: 20px 0 40px 0;
+  align-items: center;
+}
+.title {
+  font-size: 30px;
+  font-family: fantasy;
+  color: aliceblue;
+  margin-bottom: 10px;
+}
+.container-btn {
+  width: 435px;
+  display: flex;
+  justify-content: space-between;
+}
+.total-card {
+  color: white;
+  font-size: 20px;
+  font-weight: 800;
+  margin: 10px;
+}

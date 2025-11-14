@@ -1,6 +1,7 @@
 .font {
-  font-family: emoji;
+  font-family: "VN-Times", Times, serif;
 }
+
 @media print {
   @page {
     size: Letter;

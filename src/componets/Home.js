@@ -1,25 +1,26 @@
 import React, { useRef, useState } from "react";
 import * as XLSX from "xlsx";
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
-import Items from "./Items";
-import Notify from "./Notify";
 import classes from "./Home.module.css";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
 export default function Home() {
   const inputRef = useRef(null);
-  const itemsRef = useRef([]);
   const [codeState, setCodeState] = useState("");
   const [nameState, setNameState] = useState("");
   const [inDate, setInDate] = useState("");
   const [rows, setRows] = useState([]); // dữ liệu sau khi đọc
-
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const data = useSelector((state) => state.data);
   const openPicker = () => inputRef.current?.click();
   const toShort = (s) => {
-    const m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-    if (!m) throw new Error("Sai định dạng dd/mm/yyyy");
-    const [_, dd, mm, yyyy] = m;
-    return `${dd}/${mm}/${yyyy.slice(2)}`;
+    console.log(s.length);
+    const part1 = s.substring(0, 7);
+    const part3 = s.substring(9, 11);
+    return part1 + part3;
   };
+  //hàm chuyển đổi thành không dấu
   function removeVietnameseTones(str) {
     return str
       .normalize("NFD") // tách ký tự + dấu
@@ -36,20 +37,9 @@ export default function Home() {
   }
   // đọc file excell
   const handleFile = async (e) => {
-    // console.log(err);
-    // if (codeState == "") {
-    //   setErr(true);
-    //   setTitleNotify("Thiếu code trại");
-    //   return;
-    // }
-    // if (nameState == "") {
-    //   setErr(true);
-    //   setTitleNotify("Thiếu tên trại");
-    //   return;
-    // }
     const file = e.target.files?.[0];
     if (!file) return;
-
+    const toastId = toast.loading("Đang tải dữ liệu...");
     // kiểm tra định dạng
     const okTypes = [
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
@@ -60,7 +50,12 @@ export default function Home() {
       !okTypes.includes(file.type) &&
       !file.name.match(/\.(xlsx|xls|csv)$/i)
     ) {
-      alert("Vui lòng chọn file Excel (.xlsx, .xls) hoặc CSV.");
+      toast.update(toastId, {
+        render: "Vui lòng chọn file Excel (.xlsx, .xls) hoặc CSV.",
+        type: "error",
+        isLoading: false,
+        autoClose: 3000,
+      });
       e.target.value = ""; // reset input
       return;
     }
@@ -81,7 +76,7 @@ export default function Home() {
       if (["01", "11"].includes(e.Breed)) {
         breed = "L" + e.Breed;
       } else if (["22", "21"].includes(e.Breed)) {
-        breed = "L" + e.Breed;
+        breed = "Y" + e.Breed;
       } else {
         breed = "CP" + e.Breed;
       }
@@ -101,66 +96,26 @@ export default function Home() {
       };
     });
     // mảng các object
-    setRows(dataJson);
-
-    // reset để lần sau chọn lại cùng file vẫn bắt onChange
-    e.target.value = "";
-  };
-
-  const exportPDF = async () => {
-    const pdf = new jsPDF({
-      orientation: "portrait", // hoặc "landscape"
-      unit: "in", // đơn vị: "pt", "mm", "cm", "in"
-      format: [8.26, 11.68],
+    dispatch({ type: "SET_ARRAY", payload: dataJson });
+    toast.update(toastId, {
+      render: "Tải dữ liệu thành công!",
+      type: "success",
+      isLoading: false,
+      autoClose: 1000,
     });
+    setTimeout(() => navigate("/print"), 1100);
 
-    for (let i = 0; i < itemsRef.current.length; i++) {
-      const element = itemsRef.current[i];
-
-      if (!element) continue;
-
-      // Chỉ render từng item nhỏ gọn
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-      });
-
-      const imgData = canvas.toDataURL("image/jpeg", 0.9); // dùng jpeg nhẹ hơn png
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-      if (i > 0) pdf.addPage();
-      pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
-      console.log(1);
-      // Giải phóng bộ nhớ canvas
-      canvas.remove();
-    }
-
-    pdf.save("items.pdf");
-    console.log("dã xong");
+    e.target.value = "";
   };
   const handleSetName = (e) => {
     let noTone = removeVietnameseTones(e.target.value);
     let result = capitalizeWords(noTone);
     setNameState(result);
   };
-  // const exportPDF = useReactToPrint({
-  //   contentRef: itemsRef,
-  //   documentTitle: "items",
-  //   pageStyle: `
-  //   @page {
-  //     { size: 7.26in 11.68in; }
-  //   }
-  // `,
-  // });
-  // const cancelErrhandler = () => {
-  //   setErr(false);
-  // };
+
   return (
     <>
-      {/* {err && <Notify title={titleNotify} handler={cancelErrhandler} />} */}
+      <ToastContainer position="top-left" />
       <div style={{ display: "grid", gap: 8 }}>
         {/* Nút đẹp để mở hộp thoại chọn file */}
         <form className={classes.form}>
@@ -214,16 +169,6 @@ export default function Home() {
             </button>
           </div>
         )}
-        {rows.length > 0 && (
-          <div className={classes["container-print"]}>
-            <strong>Tổng: {rows.length} thẻ</strong>
-            <button className={classes["custom-btn"]} onClick={exportPDF}>
-              IN
-            </button>
-          </div>
-        )}
-
-        {/* Input file ẩn */}
         <input
           ref={inputRef}
           type="file"
@@ -233,27 +178,6 @@ export default function Home() {
         />
         {/* Demo hiện dữ liệu đọc được */}
       </div>
-      {rows.length != 0 && (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          {rows.map((e, i) => {
-            return (
-              <div
-                ref={(el) => (itemsRef.current[i] = el)}
-                className={classes.page}
-                key={i}
-              >
-                <Items props={e} />
-              </div>
-            );
-          })}
-        </div>
-      )}
     </>
   );
 }

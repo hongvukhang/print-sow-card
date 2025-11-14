@@ -32,6 +32,7 @@
   font-size: 18px;
   font-weight: 700;
   font-family: serif;
+  font-family: "Times New Roman", Times, serif;
 }
 .container-button-file {
   display: flex;
